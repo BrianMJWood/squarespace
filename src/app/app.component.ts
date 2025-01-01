@@ -1,111 +1,61 @@
-import { Component, signal, effect, computed } from '@angular/core';
-import { AppService } from './app.service';
+import { ChangeDetectionStrategy, Component } from '@angular/core';
+import { Store } from '@ngrx/store';
+import { Observable } from 'rxjs';
+import {
+  loadPosts,
+  setActivePost,
+  resetActivePost,
+  setBackdropFalse,
+  toggleGridMode,
+} from './state/app.actions';
 import { Post } from './models/post';
 import { PostComponent } from './post/post.component';
+import { AsyncPipe, CommonModule } from '@angular/common';
+import {
+  selectPosts,
+  selectActivePostId,
+  selectShowBackdrop,
+  selectIsFlexible,
+} from './state/app.selectors';
 
 @Component({
   selector: 'app-root',
   standalone: true,
-  imports: [PostComponent],
-  providers: [AppService],
+  imports: [PostComponent, AsyncPipe, CommonModule],
   templateUrl: './app.component.html',
-  styleUrl: './app.component.scss',
+  styleUrls: ['./app.component.scss'],
+  changeDetection: ChangeDetectionStrategy.OnPush,
 })
 export class AppComponent {
-  posts = signal<Post[]>([]);
-  activePostId = signal<number | null>(null);
-  showBackdrop = signal<boolean>(false);
+  posts$: Observable<Post[]> = this.store.select(selectPosts);
+  activePostId$: Observable<number | null> =
+    this.store.select(selectActivePostId);
+  showBackdrop$: Observable<boolean> = this.store.select(selectShowBackdrop);
+  isFlexible$: Observable<boolean> = this.store.select(selectIsFlexible);
 
-  headerText = computed(
-    () => `Current active post ID: ${this.activePostId() ?? 'None chosen'}`
-  );
-
-  constructor(private appService: AppService) {
-    this.fetchPosts();
-  }
-
-  fetchPosts() {
-    this.appService.getPosts().subscribe((posts) => {
-      this.posts.set(
-        posts.map((post) => ({
-          ...post,
-          displayProperty: 'title',
-        }))
-      );
-    });
-  }
-
-  getPostContent(post: Post) {
-    const propertyMap: { [key: string | number]: string | number } = {
-      title: post.title,
-      userId: post.userId,
-      id: post.id,
-      body: post.body,
-    };
-    return propertyMap[post.displayProperty ?? 'title'];
-  }
-
-  getPostHeaderContent(post: Post) {
-    return this.activePostId() === post.id ? `${post.displayProperty}:` : '';
-  }
-
-  cyclePostDisplayProperty(post: Post): void {
-    switch (post.displayProperty) {
-      case 'title':
-        post.displayProperty = 'userId';
-        break;
-      case 'userId':
-        post.displayProperty = 'id';
-        break;
-      case 'id':
-        post.displayProperty = 'body';
-        break;
-      case 'body':
-      default:
-        post.displayProperty = 'title';
-        break;
-    }
-    this.posts.update((currentPosts) =>
-      currentPosts.map((p) => (p.id === post.id ? { ...post } : p))
-    );
+  constructor(private store: Store) {
+    this.store.dispatch(loadPosts());
   }
 
   handlePostClick(post: Post) {
-    if (this.activePostId() && this.activePostId() !== post.id) {
-      this.resetPost();
-    }
-
-    if (this.activePostId() === post.id) {
-      this.cyclePostDisplayProperty(post);
-    }
-
-    this.showBackdrop.set(true);
-    this.activePostId.set(post.id);
+    this.store.dispatch(setActivePost({ postId: post.id }));
   }
 
-  resetPost() {
-    this.posts.update((currentPosts) =>
-      currentPosts.map((post) =>
-        post.id === this.activePostId()
-          ? { ...post, displayProperty: 'title' }
-          : post
-      )
-    );
-    this.activePostId.set(null);
-    this.showBackdrop.set(false);
-  }
-
-  handleBackdropClick() {
-    this.showBackdrop.set(false);
-    this.resetPost();
+  toggleBackdropOff() {
+    this.store.dispatch(resetActivePost());
+    this.store.dispatch(setBackdropFalse());
   }
 
   onKeyup(event: KeyboardEvent, post?: Post) {
     if (event.key === 'Escape') {
-      this.handleBackdropClick();
+      this.toggleBackdropOff();
     }
     if (event.key === 'Enter' && post) {
       this.handlePostClick(post);
     }
+  }
+
+  toggleGridMode() {
+    this.store.dispatch(toggleGridMode());
   }
 }

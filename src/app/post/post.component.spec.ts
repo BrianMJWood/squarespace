@@ -25,7 +25,7 @@ describe('PostComponent', () => {
 
     const compiled = fixture.nativeElement as HTMLElement;
     const header = compiled.querySelector('h2');
-    const content = compiled.querySelector('.post');
+    const content = compiled.querySelector('.post-content');
 
     expect(header?.textContent).toBe('Test Header');
     expect(content?.textContent?.trim()).toContain('Test content');

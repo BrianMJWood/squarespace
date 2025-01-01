@@ -7,7 +7,7 @@
   height: 100%;
 }
 
-.header {
+header {
   position: fixed;
   top: 0;
   left: 0;
@@ -21,46 +21,81 @@
   z-index: 10;
 }
 
-.post-grid {
+.header-content {
+  flex: 1;
+  text-align: center;
+  font-size: 18px;
+}
+
+.header-button {
+  position: absolute;
+  right: 10px;
+}
+
+.toggle-grid-style {
+  background-color: #5f18e2;
+  color: white;
+  border: none;
+  padding: 5px;
+  border-radius: 5px;
+  cursor: pointer;
+  font-size: 12px;
+}
+
+.toggle-grid-style:hover {
+  background-color: #6e28f0;
+}
+
+.post-grid-strict {
   display: grid;
   grid-template-columns: repeat(10, 200px);
   grid-auto-rows: 200px;
   gap: 10px;
   width: max-content;
   padding: 20px;
-  margin-top: 75px;
   background-color: #29293b;
   margin: 80px auto;
+}
 
-  .post {
-    cursor: pointer;
-    background-color: #3d3d5e;
-    display: flex;
-    align-items: center;
-    text-align: center;
-    justify-content: center;
-    border: 1px solid #4a4a6e;
-    height: 200px;
+.post-grid-flexible {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, 200px);
+  gap: 10px;
+  justify-content: center;
+  padding: 20px;
+  background-color: #29293b;
+  margin: 80px auto;
+  max-width: calc(200px * 10 + 90px);
+}
 
-    border-radius: 5px;
-    transition: all 0.2s ease;
+.post {
+  cursor: pointer;
+  background-color: #3d3d5e;
+  display: flex;
+  align-items: center;
+  text-align: center;
+  justify-content: center;
+  border: 1px solid #4a4a6e;
+  height: 200px;
 
-    &:hover {
-      transform: scale(1.1);
-      box-shadow: 0 0 15px rgba(0, 0, 0, 0.5);
-    }
+  border-radius: 5px;
+  transition: all 0.2s ease;
 
-    &.selectedPost {
-      background-color: #47476f;
-      width: 400px;
-      height: 400px;
-      z-index: 10;
-      position: fixed;
-      top: 50%;
-      left: 50%;
+  &:hover {
+    transform: scale(1.1);
+    box-shadow: 0 0 15px rgba(0, 0, 0, 0.5);
+  }
 
-      -webkit-transform: translate(-50%, -50%);
-      transform: translate(-50%, -50%);
-    }
+  &.selectedPost {
+    background-color: #47476f;
+    width: 400px;
+    height: 400px;
+    z-index: 10;
+    position: fixed;
+    top: 50%;
+    left: 50%;
+
+    -webkit-transform: translate(-50%, -50%);
+    transform: translate(-50%, -50%);
   }
 }

@@ -1,29 +1,40 @@
-@if (showBackdrop()) {
+@if (showBackdrop$ | async) {
 <div
-  tabindex="1"
   class="backdrop"
-  (click)="handleBackdropClick()"
+  (click)="toggleBackdropOff()"
   (keyup)="onKeyup($event)"
+  aria-label="Backdrop"
 ></div>
 }
+<header>
+  <div class="header-content">
+    Active Post ID: {{ (activePostId$ | async) || "None" }}
+  </div>
+  <button class="toggle-grid-style" (click)="toggleGridMode()">
+    Toggle Grid Style
+  </button>
+</header>
 
-<div class="header">
-  {{ headerText() }}
-</div>
-
-<div class="post-grid">
-  @for (post of posts(); track post.id) {
+<main
+  [ngClass]="{
+    'post-grid-flexible': isFlexible$ | async,
+    'post-grid-strict': !(isFlexible$ | async)
+  }"
+>
+  @for (post of posts$ | async; track post.id) {
   <div
-    tabindex="1"
+    tabindex="{{ post.id }}"
     class="post"
     (click)="handlePostClick(post)"
     (keyup)="onKeyup($event, post)"
-    [class.selectedPost]="post.id === activePostId()"
+    [class.selectedPost]="(activePostId$ | async) === post.id"
   >
     <app-post
-      [postContent]="getPostContent(post)"
-      [postHeader]="getPostHeaderContent(post)"
-    />
+      [postContent]="post[post.displayProperty || 'title']"
+      [postHeader]="post.displayProperty || ''"
+    ></app-post>
   </div>
+  } @empty {
+  <div>Posts failed to load!</div>
   }
-</div>
+</main>

@@ -3,5 +3,5 @@ export interface Post {
   id: number;
   title: string;
   body: string;
-  displayProperty?: string;
+  displayProperty?: 'title' | 'userId' | 'id' | 'body';
 }
